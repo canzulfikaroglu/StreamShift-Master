@@ -1,0 +1,37 @@
+﻿@model StreamShift.Domain.Entities.Transfer
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Transfer</h4>
+<hr />
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="SourceConnectionString" class="control-label"></label>
+        <input asp-for="SourceConnectionString" class="form-control" />
+        <span asp-validation-for="SourceConnectionString" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DestinationConnectionString" class="control-label"></label>
+        <input asp-for="DestinationConnectionString" class="form-control" />
+        <span asp-validation-for="DestinationConnectionString" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="SourceDatabase" class="control-label"></label>
+        <input asp-for="SourceDatabase" class="form-control" />
+        <span asp-validation-for="SourceDatabase" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DestinationDatabase" class="control-label"></label>
+        <input asp-for="DestinationDatabase" class="form-control" />
+        <span asp-validation-for="DestinationDatabase" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+    </div>
+</form>

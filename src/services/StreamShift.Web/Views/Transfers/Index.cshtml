@@ -1,0 +1,63 @@
+﻿@model IEnumerable<StreamShift.Domain.Entities.Transfer>
+
+@{
+    ViewData["Title"] = "Transfer List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Transfer Listesi</h1>
+
+<p>
+    <a asp-action="Create">Yeni Transfer Oluştur</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SourceConnectionString)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DestinationConnectionString)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SourceDatabase)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DestinationDatabase)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsFinished)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SourceConnectionString)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DestinationConnectionString)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SourceDatabase)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DestinationDatabase)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsFinished)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id"><i class="fa-solid fa-pen-to-square"></i></a> |
+                    <a asp-action="Details" asp-route-id="@item.Id"><i class="fa-solid fa-circle-info"></i></a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id"><i class="fa-solid fa-trash"></i></a> |
+                    <a asp-action="Start" asp-route-id="@item.Id"><i class="fa-solid fa-play"></i></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

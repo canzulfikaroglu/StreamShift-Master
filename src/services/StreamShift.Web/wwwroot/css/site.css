@@ -1,0 +1,168 @@
+﻿html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+}
+placeholder{
+    height: 500px
+   
+}
+
+@media (min-width: 768px) {
+    html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #343a40;
+    border-bottom: 3px solid #495057;
+}
+
+    .navbar .navbar-brand,
+    .navbar .navbar-nav .nav-link {
+        color: #e9ecef;
+    }
+
+        .navbar .navbar-brand:hover,
+        .navbar .navbar-nav .nav-link:hover {
+            color: #adb5bd;
+        }
+
+/* Footer */
+footer {
+    background-color: #343a40;
+    color: #e9ecef;
+    text-align: center;
+    padding: 1px 0;
+    position: fixed;
+    bottom: 0;
+    width: 70%;
+}
+
+/* Identity Sayfaları */
+.form-control {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    box-shadow: none;
+    height: 45px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 0.25rem;
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #007bff;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Alert */
+.alert {
+    border-radius: 0.25rem;
+    font-size: 16px;
+    padding: 15px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+/* Tablo */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody + tbody {
+        border-top: 2px solid #dee2e6;
+    }
+
+/* Başlık ve Linkler */
+h1, h2, h3, h4, h5, h6 {
+    color: #333;
+    font-weight: 600;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
