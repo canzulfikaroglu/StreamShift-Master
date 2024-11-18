@@ -10,6 +10,7 @@ builder.Services.AddDbContext<AppDb>(options =>
 {
     options.UseNpgsql(connectionString);
 });//aa
+//bb
 int a;
 int b;
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
