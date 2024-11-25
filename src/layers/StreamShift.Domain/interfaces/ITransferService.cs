@@ -14,7 +14,8 @@ namespace StreamShift.Domain.interfaces
 {
     public interface ITransferService<TEntity> where TEntity : class
     {
-        Task TransferData(string sourceConnectionString, string targetConnectionString,eDatabase databaseType);
+        Task TransferData(string sourceConnectionString, string targetConnectionString,eDatabaseSource databaseTypesource, eDatabaseTarget databaseTypeTarget);
+
     }
 
 }

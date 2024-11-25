@@ -30,7 +30,7 @@ namespace StreamShift.Persistence.Extension
         {
             switch (options.SourceDbType)
             {
-                case eDatabase.Mongodb:
+                case eDatabaseSource.Mongodb:
                     services.AddScoped<IRepository<TEntity>>(provider =>
                     {
                         var mongoContextFactory = provider.GetService<IMongoContextFactory>();
@@ -38,9 +38,9 @@ namespace StreamShift.Persistence.Extension
                         return new MongoRepository<TEntity>(database, typeof(TEntity).Name);
                     });
                     break;
-                case eDatabase.MsSqlServer:
-                case eDatabase.Postgres:
-                case eDatabase.Sqlite:
+                case eDatabaseSource.MsSqlServer:
+                case eDatabaseSource.Postgres:
+                case eDatabaseSource.Sqlite:
                     services.AddScoped<IRepository<TEntity>>(provider =>
                     {
                         var dbContextFactory = provider.GetService<IDbContextFactory>();
@@ -48,7 +48,7 @@ namespace StreamShift.Persistence.Extension
                         return new MsSqlRepository<TEntity>(dbContext);
                     });
                     break;
-                case eDatabase.Redis:
+                case eDatabaseSource.Redis:
                     services.AddScoped<IRepository<TEntity>>(provider =>
                     {
                         var redisContextFactory = provider.GetService<IRedisContextFactory>();
@@ -64,7 +64,7 @@ namespace StreamShift.Persistence.Extension
                 //        return new ExcelRepository<TEntity>(package);
                 //    });
                 //    break;
-                case eDatabase.Json:
+                case eDatabaseSource.Json:
                     services.AddScoped<IRepository<TEntity>>(provider =>
                     {
                         var jsonContextFactory = provider.GetService<IJsonContextFactory>();
@@ -72,7 +72,7 @@ namespace StreamShift.Persistence.Extension
                         return new JsonRepository<TEntity>(document);
                     });
                     break;
-                case eDatabase.Xml:
+                case eDatabaseSource.Xml:
                     services.AddScoped<IRepository<TEntity>>(provider =>
                     {
                         var xmlContextFactory = provider.GetService<IXmlContextFactory>();

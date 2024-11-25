@@ -16,19 +16,19 @@ namespace StreamShift.Persistence.ContextFactories.Concrete
 {
     public class DbContextFactory : IDbContextFactory
     {
-        public DbContext CreateDbContext(string connectionString, eDatabase dbType)
+        public DbContext CreateDbContext(string connectionString, eDatabaseSource dbType)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DbContext>();
 
             switch (dbType)
             {
-                case eDatabase.MsSqlServer:
+                case eDatabaseSource.MsSqlServer:
                     optionsBuilder.UseSqlServer(connectionString);
                     break;
-                case eDatabase.Postgres:
+                case eDatabaseSource.Postgres:
                     optionsBuilder.UseNpgsql(connectionString);
                     break;
-                case eDatabase.Sqlite:
+                case eDatabaseSource.Sqlite:
                     optionsBuilder.UseSqlite(connectionString);
                     break;
                 default:

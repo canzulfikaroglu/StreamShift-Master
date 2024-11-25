@@ -15,7 +15,7 @@ namespace StreamShift.Persistence.ContextFactories.Abstract
 {
     public interface IDbContextFactory
     {
-        DbContext CreateDbContext(string connectionString, eDatabase dbType);
+        DbContext CreateDbContext(string connectionString, eDatabaseSource dbType);
     }
 
     public interface IMongoContextFactory

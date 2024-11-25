@@ -17,9 +17,9 @@ namespace StreamShift.Domain.Entities
         [Display(Name = "Hedef Bağlantı Adresi")]
         public string DestinationConnectionString { get; set; }
         [Display(Name = "Kaynak Veri Tabanı")]
-        public eDatabase SourceDatabase { get; set; }
+        public eDatabaseSource SourceDatabase { get; set; }
         [Display(Name = "Hedef Veri Tabanı")]
-        public eDatabase DestinationDatabase { get; set; }
+        public eDatabaseTarget DestinationDatabase { get; set; }
         [Display(Name = "Bitti Mi")]
         public bool IsFinished { get; set; }
         public virtual string? AppUserId { get; set; }

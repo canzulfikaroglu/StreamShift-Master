@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StreamShift.ApplicationContract.Enums;
 using StreamShift.Domain.Entities;
+using StreamShift.Domain.interfaces;
 using StreamShift.Persistence.Context;
 using StreamShift.Persistence.Repository;
 using StreamShift.Web.TransferServices;
@@ -48,8 +49,8 @@ namespace StreamShift.Web.Controllers
         // GET: Transfer/Create
         public IActionResult Create()
         {
-            ViewBag.eDatabaseList = Enum.GetValues(typeof(eDatabase))
-                .Cast<eDatabase>()
+            ViewBag.eDatabaseList = Enum.GetValues(typeof(eDatabaseSource))
+                .Cast<eDatabaseSource>()
                 .Select(e => new SelectListItem
                 {
                     Value = e.ToString(),
@@ -72,8 +73,8 @@ namespace StreamShift.Web.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.eDatabaseList = Enum.GetValues(typeof(eDatabase))
-                .Cast<eDatabase>()
+            ViewBag.eDatabaseList = Enum.GetValues(typeof(eDatabaseSource))
+                .Cast<eDatabaseSource>()
                 .Select(e => new SelectListItem
                 {
                     Value = e.ToString(),
@@ -190,7 +191,7 @@ namespace StreamShift.Web.Controllers
         }
 
         //POST: Transfer/Start
-      
+
         public async Task<IActionResult> Start(string id)
         {
             var transfer = await _context.Transfers.FirstOrDefaultAsync(m => m.Id == id);
@@ -199,11 +200,25 @@ namespace StreamShift.Web.Controllers
                 return NotFound("Transfer record not found.");
             }
 
-            return View();
+            var transferService = new TransferService<object>();
+            string sourceConnectionString = transfer.SourceConnectionString;
+            string destinationConnectionString = transfer.DestinationConnectionString;
+            var databaseTypeSource = eDatabaseSource.Postgres;
+            var databaseTypeTarget = eDatabaseTarget.Postgres;
 
+            try
+            {
+                await transferService.TransferData(sourceConnectionString, destinationConnectionString, databaseTypeSource, databaseTypeTarget);
+                return Ok("Data transfer completed successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error during transfer: {ex.Message}");
+            }
         }
+
     }
- 
+
     //start endpointi oluşturulacak 
     // buradan Id gelecek o id ile veritabanından connetcion bilgilerini alabileceğiz o connection bilgileri ile 
     //okuduğumuz veriyi direkt insert yapacağız liste yapısıyla tutulmayacak
