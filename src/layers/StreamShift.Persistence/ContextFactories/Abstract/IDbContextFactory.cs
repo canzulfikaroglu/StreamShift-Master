@@ -42,4 +42,5 @@ namespace StreamShift.Persistence.ContextFactories.Abstract
     {
         XDocument CreateXDocument(string xmlString);
     }
+
 }

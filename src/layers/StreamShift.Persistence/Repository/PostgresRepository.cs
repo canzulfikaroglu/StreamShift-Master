@@ -71,6 +71,21 @@ namespace StreamShift.Persistence.Repository
         {
             throw new NotImplementedException();
         }
+        // aşşağıdaki fonksiyonu sadece postgre için ekliyorum ilerleyen zamanda diğer veritabanları için de geçerli olacak
+        //bu fonksiyon 1000 satırlık veriyi alıp listeye çeviriyor
+        //public async Task<List<T>> GetRowsAsync<T>() where T : class
+        //{
+        //    using var context = new CreateDbContext();
+        //    return await context.Set<>
+
+        //}
+        
+
+        
+        
+
+        
+
 
     }
 }

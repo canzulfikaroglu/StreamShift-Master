@@ -3,6 +3,7 @@ using Npgsql;
 using StreamShift.ApplicationContract.Enums;
 using StreamShift.Domain.interfaces;
 using StreamShift.Persistence.Abstract;
+using System.Data.Common;
 
 namespace StreamShift.Web.TransferServices
 {
@@ -17,44 +18,28 @@ namespace StreamShift.Web.TransferServices
             // Hedef veritabanı bağlantısı
             await using var destinationConnection = new NpgsqlConnection(destinationConnectionString);
             await destinationConnection.OpenAsync();
+            sourceConnection.Open();
+            //int pageSize = 1000; // Her seferde 1000 satır alın
+            //int currentPage = 0;
 
-            try
+            //while (true)
+            //{
+            //    var rows = await sourceConnection.GetRowsAsync(currentPage * pageSize, pageSize);
+            //    if (rows.Count == 0)
+            //        break;
+
+            //    await destinationConnection.InsertRowsAsync(rows);
+            //    currentPage++;
+            //}
+            // await destinationConnectionString.InsertRow
+            //örnek veritabanı insert komutu
+            await using var dataSource = NpgsqlDataSource.Create(sourceConnectionString);
+            await using (var cmd = dataSource.CreateCommand("insert into \"musteriler\" values (11,'can','zulfikaroglu','can_azulfikaroglu@hotmail.com')"))
             {
-                // Kaynak veritabanındaki tüm tabloları al
-                var getSourceTablesCommand = new NpgsqlCommand(
-                    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';",
-                    sourceConnection);
-
-                await using var sourceReader = await getSourceTablesCommand.ExecuteReaderAsync();
-
-                while (await sourceReader.ReadAsync())
-                {
-                    string tableName = sourceReader.GetString(0);
-
-                    // Tablo içeriğini oku
-                    var getDataCommand = new NpgsqlCommand($"SELECT * FROM {tableName};", sourceConnection);
-                    await using var tableDataReader = await getDataCommand.ExecuteReaderAsync();
-
-                    // Hedef veritabanına tabloyu kopyala
-                    while (await tableDataReader.ReadAsync())
-                    {
-                        // Burada hedef veritabanına veri yazma işlemini gerçekleştirin
-                        var insertCommand = new NpgsqlCommand(
-                            $"INSERT INTO {tableName} VALUES (12,'can1')", // Burayı tablo yapısına uygun şekilde tamamlayın
-                            destinationConnection);
-                        
-                        // Örnek veri ekleme mantığı:
-                        // insertCommand.Parameters.AddWithValue("@column1", tableDataReader["column1"]);
-                        // insertCommand.Parameters.AddWithValue("@column2", tableDataReader["column2"]);
-                        
-                        await insertCommand.ExecuteNonQueryAsync();
-                    }
-                }
+                
+                await cmd.ExecuteNonQueryAsync();
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error during data transfer: {ex.Message}", ex);
-            }
+
         }
     }
 }
