@@ -1,7 +1,7 @@
 ﻿
 using StreamShift.Domain.DatabaseEnums;
 
-namespace StreamShift.Persistence.ContextFactories.Models
+namespace StreamShift.Infrastructure.ContextFactories.Models
 {
     public class DbConnectionOptions
     {

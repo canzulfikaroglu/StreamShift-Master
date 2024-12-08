@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using StreamShift.Domain.Entities;
-using StreamShift.Persistence.Context;
-using Microsoft.AspNetCore.Identity;
+using StreamShift.Infrastructure.Context;
+using StreamShift.Infrastructure.Services.TransferService.Abstract;
+using StreamShift.Infrastructure.Services.TransferService.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,10 +10,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDb>(options =>
 {
     options.UseNpgsql(connectionString);
-});//aa
-Console.WriteLine("can");
-int a;
-int b;
+}, ServiceLifetime.Scoped, ServiceLifetime.Scoped);
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<AppUser>(options =>
@@ -30,6 +29,9 @@ builder.Services.AddDefaultIdentity<AppUser>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 3;
 }).AddRoles<AppRole>().AddEntityFrameworkStores<AppDb>();
+
+builder.Services.AddScoped<ITransferService, TransferService>();
+builder.Services.AddScoped<StreamShift.Infrastructure.ContextFactories.Abstract.IDbContextFactory, StreamShift.Infrastructure.ContextFactories.Concrete.DbContextFactory>();
 
 builder.Services.AddControllersWithViews();
 

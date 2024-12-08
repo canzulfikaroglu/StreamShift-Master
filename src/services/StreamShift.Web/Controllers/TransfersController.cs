@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using StreamShift.ApplicationContract.Enums;
+using StreamShift.Domain.DatabaseEnums;
 using StreamShift.Domain.Entities;
-using StreamShift.Persistence.Context;
-using StreamShift.Persistence.Repository;
-using StreamShift.Web.TransferServices;
+using StreamShift.Infrastructure.Services.TransferService.Abstract;
+using StreamShift.Infrastructure.Context;
+using StreamShift.Infrastructure.Repository;
 
 namespace StreamShift.Web.Controllers
 {
@@ -14,9 +14,11 @@ namespace StreamShift.Web.Controllers
     public class TransfersController : Controller
     {
         private readonly AppDb _context;
-        public TransfersController(AppDb context)
+        private readonly ITransferService _transferService;
+        public TransfersController(AppDb context, ITransferService transferService)
         {
             _context = context;
+            _transferService = transferService;
         }
 
         // GET: Transfer
@@ -68,7 +70,7 @@ namespace StreamShift.Web.Controllers
             transfer.IsFinished = false;
             if (ModelState.IsValid)
             {
-                _context.Add(transfer);
+                _context.Transfers.Add(transfer);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -190,7 +192,7 @@ namespace StreamShift.Web.Controllers
         }
 
         //POST: Transfer/Start
-      
+
         public async Task<IActionResult> Start(string id)
         {
             var transfer = await _context.Transfers.FirstOrDefaultAsync(m => m.Id == id);
@@ -199,13 +201,26 @@ namespace StreamShift.Web.Controllers
                 return NotFound("Transfer record not found.");
             }
 
-            return View();
+            try
+            {
+                await _transferService.TransferDatabase(
+                        transfer.SourceConnectionString,
+                        transfer.SourceDatabase,
+                        transfer.DestinationConnectionString,
+                        transfer.DestinationDatabase);
 
+                transfer.IsFinished = true;
+                await _context.SaveChangesAsync();
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
- 
+
     //start endpointi oluşturulacak 
     // buradan Id gelecek o id ile veritabanından connetcion bilgilerini alabileceğiz o connection bilgileri ile 
     //okuduğumuz veriyi direkt insert yapacağız liste yapısıyla tutulmayacak
-
 }

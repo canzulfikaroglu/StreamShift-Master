@@ -5,7 +5,7 @@ using StreamShift.Domain.DatabaseEnums;
 using System.Text.Json;
 using System.Xml.Linq;
 
-namespace StreamShift.Persistence.ContextFactories.Abstract
+namespace StreamShift.Infrastructure.ContextFactories.Abstract
 {
     public interface IDbContextFactory
     {

@@ -17,10 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamShift.Infrastructure"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamShift.Application", "src\layers\StreamShift.Application\StreamShift.Application.csproj", "{2AEDC03E-1DA4-43F6-B647-64CD1BC10157}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamShift.Persistence", "src\layers\StreamShift.Persistence\StreamShift.Persistence.csproj", "{E365FD40-812F-4598-814E-049117F38BCD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamShift.ApplicationContract", "src\layers\StreamShift.ApplicationContract\StreamShift.ApplicationContract.csproj", "{E6214F2C-EFD7-4629-A8B7-462F3009EEE6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,14 +39,6 @@ Global
 		{2AEDC03E-1DA4-43F6-B647-64CD1BC10157}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AEDC03E-1DA4-43F6-B647-64CD1BC10157}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AEDC03E-1DA4-43F6-B647-64CD1BC10157}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E365FD40-812F-4598-814E-049117F38BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E365FD40-812F-4598-814E-049117F38BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E365FD40-812F-4598-814E-049117F38BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E365FD40-812F-4598-814E-049117F38BCD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E6214F2C-EFD7-4629-A8B7-462F3009EEE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6214F2C-EFD7-4629-A8B7-462F3009EEE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E6214F2C-EFD7-4629-A8B7-462F3009EEE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6214F2C-EFD7-4629-A8B7-462F3009EEE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,8 +50,6 @@ Global
 		{6709A8E2-FA3C-42F6-A9BF-CAB812AF4110} = {CABAC5ED-642F-4B96-812B-A9B4378389A4}
 		{B9E199FA-2DA6-4194-B45E-E380C42E85B3} = {CABAC5ED-642F-4B96-812B-A9B4378389A4}
 		{2AEDC03E-1DA4-43F6-B647-64CD1BC10157} = {CABAC5ED-642F-4B96-812B-A9B4378389A4}
-		{E365FD40-812F-4598-814E-049117F38BCD} = {CABAC5ED-642F-4B96-812B-A9B4378389A4}
-		{E6214F2C-EFD7-4629-A8B7-462F3009EEE6} = {CABAC5ED-642F-4B96-812B-A9B4378389A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EBACA8D1-B977-45CB-A31E-080A9D26142E}

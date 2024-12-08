@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StreamShift.Domain.DatabaseEnums;
-using StreamShift.Persistence.Abstract;
-using StreamShift.Persistence.ContextFactories.Abstract;
-using StreamShift.Persistence.ContextFactories.Models;
-using StreamShift.Persistence.Repository;
+using StreamShift.Infrastructure.Abstract;
+using StreamShift.Infrastructure.ContextFactories.Abstract;
+using StreamShift.Infrastructure.ContextFactories.Models;
+using StreamShift.Infrastructure.Repository;
 using System.Linq.Expressions;
 
-namespace StreamShift.Persistence.Extension
+namespace StreamShift.Infrastructure.Extension
 {
     public static class RepositoryExt
     {

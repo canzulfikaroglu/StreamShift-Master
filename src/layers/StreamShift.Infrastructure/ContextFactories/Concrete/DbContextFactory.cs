@@ -2,11 +2,11 @@
 using MongoDB.Driver;
 using StackExchange.Redis;
 using StreamShift.Domain.DatabaseEnums;
-using StreamShift.Persistence.ContextFactories.Abstract;
+using StreamShift.Infrastructure.ContextFactories.Abstract;
 using System.Text.Json;
 using System.Xml.Linq;
 
-namespace StreamShift.Persistence.ContextFactories.Concrete
+namespace StreamShift.Infrastructure.ContextFactories.Concrete
 {
     public class DbContextFactory : IDbContextFactory
     {
