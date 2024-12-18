@@ -220,7 +220,4 @@ namespace StreamShift.Web.Controllers
         }
     }
 
-    //start endpointi oluşturulacak 
-    // buradan Id gelecek o id ile veritabanından connetcion bilgilerini alabileceğiz o connection bilgileri ile 
-    //okuduğumuz veriyi direkt insert yapacağız liste yapısıyla tutulmayacak
 }
