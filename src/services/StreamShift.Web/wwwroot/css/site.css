@@ -42,18 +42,21 @@ body {
 
 /* Navbar */
 .navbar {
-    background-color: #343a40;
+    background-color: #e2e6ff;
     border-bottom: 3px solid #495057;
 }
 
-    .navbar .navbar-brand,
+    .navbar ,
     .navbar .navbar-nav .nav-link {
         color: #e9ecef;
     }
+        .navbar-brand{
+            color : black;
+        }
 
         .navbar .navbar-brand:hover,
         .navbar .navbar-nav .nav-link:hover {
-            color: #adb5bd;
+            color: blue;
         }
 
 /* Footer */
@@ -133,6 +136,11 @@ footer {
     background-color: #fff;
     border: 1px solid #dee2e6;
     border-radius: 0.25rem;
+}
+.wrap-text {
+    word-wrap: break-word; /* Metni kırar */
+    white-space: normal; /* Metnin satır içine sığmaması durumunda alt satıra geçmesine izin verir */
+    max-width: 20px; /* Maksimum genişlik belirleyin */
 }
 
     .table th,

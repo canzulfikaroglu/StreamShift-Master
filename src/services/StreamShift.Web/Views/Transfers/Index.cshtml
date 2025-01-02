@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<StreamShift.Domain.Entities.Transfer>
+ <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 @{
     ViewData["Title"] = "Transfer List";
@@ -29,6 +30,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.IsFinished)
             </th>
+            <th>
+                Procesies
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -36,10 +40,10 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>
+                <td class="wrap-text">
                     @Html.DisplayFor(modelItem => item.SourceConnectionString)
                 </td>
-                <td>
+                <td class="wrap-text">
                     @Html.DisplayFor(modelItem => item.DestinationConnectionString)
                 </td>
                 <td>
@@ -51,6 +55,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.IsFinished)
                 </td>
+
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id"><i class="fa-solid fa-pen-to-square"></i></a> |
                     <a asp-action="Details" asp-route-id="@item.Id"><i class="fa-solid fa-circle-info"></i></a> |

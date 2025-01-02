@@ -16,4 +16,15 @@
     {
         public bool Exist { get; set; }
     }
+
+    public class DataTypes
+    {
+        public Dictionary<string, object> Columns { get; set; }
+
+        public DataTypes()
+        {
+            Columns = new Dictionary<string, object>();
+        }
+    }
+   
 }

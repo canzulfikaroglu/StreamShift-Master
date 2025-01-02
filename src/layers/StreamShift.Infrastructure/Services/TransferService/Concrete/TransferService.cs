@@ -27,7 +27,7 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
                 using (var _destinationDbContext = _contextFactory.CreateDbContext(destinationConnectionString, destinationType))
                 {
                    
-                    QueryExtensions.TableSequenceCreate(sourceSchema, _destinationDbContext);//sekans oluşturur
+                    QueryExtensions.TableSequenceCreate(sourceSchema, _destinationDbContext);//sekans oluşturur PostgreSQL için
                     
                  
                     var schemas = sourceSchema.GroupBy(x => x.SchemaName).Select(x => x.Key).ToList();
@@ -38,7 +38,7 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
                         {
                          //   foreach(var value in values)
                            // {
-
+                           //
                             //}
                             var existResult = destinationType.TableExistsQuery(table);
                             var isExsist = _destinationDbContext.Database.SqlQueryRaw<TableExist>(existResult).ToList();
@@ -60,13 +60,14 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
                                             IsNotNull = x.IsNotNull
                                         });
 
-                                        var createTableQuery = destinationType.GetCreateTableQuery(table, columns);
-                                        await _destinationDbContext.Database.ExecuteSqlRawAsync(createTableQuery);
-                                        //var selectQuery = $"SELECT * FROM {table}";
-                                        //var data = await _sourceDbContext.Database.SqlQueryRaw(selectQuery).ToListAsync();
+                                        }
+
+
+                                        // var selectQuery = $"SELECT * FROM {table}";
+                                        //var data = await _sourceDbContext.Database.SqlQueryRaw<DataTypes>(selectQuery).ToListAsync();
                                         //foreach (var row in data)
                                         //{
-                                        //    var insertQuery = destinationType.GetInsertQuery(table, columns, row);
+                                        //    var insertQuery = destinationType.GetInsertDataQuery(table, columns, row);
                                         //    await _destinationDbContext.Database.ExecuteSqlRawAsync(insertQuery);
                                         //}
                                     }
@@ -78,4 +79,3 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
             }
         }
     }
-}

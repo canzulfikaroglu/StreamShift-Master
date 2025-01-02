@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MongoDB.Driver;
+using System.Security.Cryptography.X509Certificates;
 
 namespace StreamShift.Infrastructure.Extension
 {
@@ -33,9 +34,6 @@ namespace StreamShift.Infrastructure.Extension
             if (string.IsNullOrWhiteSpace(tableName) || columns == null || !columns.Any())
                 throw new ArgumentException("Table name and columns must be provided.");
 
-
-            //kolonlar oluşturulmadan önce Sequence'in primary key için oluşturulacak not exist hatasının çözümü......CREATE SEQUENCE urunler_urun_id_seq;
-            // Kolon tanımlamaları oluşturma
             var columnDefinitions = columns.Select(c =>
             {
                 var columnDef = $"{c.ColumnName} {c.DataType}";
@@ -121,9 +119,44 @@ namespace StreamShift.Infrastructure.Extension
                     Console.WriteLine($"Sütun birincil anahtar değil: {schema.ColumnName}");
                 }
             }
-
-           
-
+         
         }
+
+        public static string GetInsertDataQuery(this eDatabase database, string tableName, IEnumerable<DataTypes> rows)
+        {
+            if (string.IsNullOrWhiteSpace(tableName) || rows == null || !rows.Any())
+                throw new ArgumentException("Table name and rows must be provided.");
+
+            var columns = rows.First().Columns.Keys;
+            var columnNames = string.Join(", ", columns);
+
+            var valuesList = rows.Select(row =>
+            {
+                var values = row.Columns.Select(c =>
+                {
+                    var value = c.Value;
+
+                    if (value == null) return "NULL"; // NULL değerler
+                    if (value is string) return $"'{value.ToString().Replace("'", "''")}'"; // String değerler
+                    if (value is bool) return (bool)value ? "TRUE" : "FALSE"; // Boolean
+                    if (value is DateTime dateValue) return $"'{dateValue:yyyy-MM-dd HH:mm:ss}'"; // Tarih/Saat
+                    return value.ToString(); // Diğer türler
+                });
+
+                return $"({string.Join(", ", values)})";
+            });
+
+            string insertDataQuery = database switch
+            {
+                eDatabase.MsSqlServer => $@"INSERT INTO {tableName} ({columnNames}) VALUES {string.Join(", ", valuesList)};",
+                eDatabase.Postgres => $@"INSERT INTO {tableName} ({columnNames}) VALUES {string.Join(", ", valuesList)};",
+                eDatabase.Sqlite => $@"INSERT INTO {tableName} ({columnNames}) VALUES {string.Join(", ", valuesList)};",
+                _ => throw new NotSupportedException($"The database type {database} is not supported.")
+            };
+
+            return insertDataQuery;
+        }
+
+
     } // CREATE SEQUENCE urunler_urun_id_seq;
 }
