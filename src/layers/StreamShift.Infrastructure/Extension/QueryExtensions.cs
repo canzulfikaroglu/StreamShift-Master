@@ -11,7 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MongoDB.Driver;
-using System.Security.Cryptography.X509Certificates;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
+
+
 
 namespace StreamShift.Infrastructure.Extension
 {
@@ -102,61 +105,67 @@ namespace StreamShift.Infrastructure.Extension
 
             return query;
         }
-        public static void TableSequenceCreate(List<TableSchema> sourceSchema,DbContext _destinationDbContext)
+        public static async void TableSequenceCreate(List<TableSchema> sourceSchema,DbContext _destinationDbContext)
         {
-
             foreach (var schema in sourceSchema)
-            {
-                if (schema.IsPrimaryKey == "YES")
+            {//sekans var ise bu kontrole girmemesini sağlamalıyız
+                //string sequenceControl = $@" SELECT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = '{schema.TableName}_{schema.ColumnName}_seq') AS sequence_exists;";
+                //var sequenceControlSql = _destinationDbContext.Database.ExecuteSql($@" SELECT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = '{schema.TableName}_{schema.ColumnName}_seq') AS sequence_exists;");
+                //sequenceControlSql.ToString();
+                
+                //using (var command = connection.CreateCommand())
+                //{
+                //    command.CommandText = sequenceControl;
+
+                //    var result = command.ExecuteScalar(); // Sorgu sonucunu döndürür
+                //    string sequenceExists = result?.ToString(); // Sonucu string'e çevirir
+
+                //    if (sequenceExists == "true")
+                //    {
+                //        Console.WriteLine("Sequence exists.");
+                //    }
+                //    else
+                //    {
+                //        Console.WriteLine("Sequence does not exist.");
+                //    }
+                //}
+                if (schema.IsPrimaryKey == "YES" )
                 {
+                    // sekanks var ise true dönen sorgu 
+                    /**/
                     string sequenceSql = $@"CREATE SEQUENCE {schema.TableName}_{schema.ColumnName}_seq";
                     var createSequence = _destinationDbContext.Database.ExecuteSqlRaw(sequenceSql);
 
+                }
+              
 
-                }
-                else
-                {
-                    Console.WriteLine($"Sütun birincil anahtar değil: {schema.ColumnName}");
-                }
             }
-         
+           
         }
-
-        public static string GetInsertDataQuery(this eDatabase database, string tableName, IEnumerable<DataTypes> rows)
+        public static string GetInsertQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns, object[] row)
         {
-            if (string.IsNullOrWhiteSpace(tableName) || rows == null || !rows.Any())
-                throw new ArgumentException("Table name and rows must be provided.");
+           
+           
+                var columnNames = string.Join(", ", columns.Select(c => c.ColumnName));
+                var values = string.Join(", ", row.Select(value => $"'{value}'")); // Veriyi uygun şekilde formatlayın
 
-            var columns = rows.First().Columns.Keys;
-            var columnNames = string.Join(", ", columns);
-
-            var valuesList = rows.Select(row =>
-            {
-                var values = row.Columns.Select(c =>
+                return database switch
                 {
-                    var value = c.Value;
+                    eDatabase.MsSqlServer => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
+                    eDatabase.Postgres => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
+                    eDatabase.Sqlite => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
+                    _ => throw new NotSupportedException($"The database type {database} is not supported.")
+                };
 
-                    if (value == null) return "NULL"; // NULL değerler
-                    if (value is string) return $"'{value.ToString().Replace("'", "''")}'"; // String değerler
-                    if (value is bool) return (bool)value ? "TRUE" : "FALSE"; // Boolean
-                    if (value is DateTime dateValue) return $"'{dateValue:yyyy-MM-dd HH:mm:ss}'"; // Tarih/Saat
-                    return value.ToString(); // Diğer türler
-                });
-
-                return $"({string.Join(", ", values)})";
-            });
-
-            string insertDataQuery = database switch
-            {
-                eDatabase.MsSqlServer => $@"INSERT INTO {tableName} ({columnNames}) VALUES {string.Join(", ", valuesList)};",
-                eDatabase.Postgres => $@"INSERT INTO {tableName} ({columnNames}) VALUES {string.Join(", ", valuesList)};",
-                eDatabase.Sqlite => $@"INSERT INTO {tableName} ({columnNames}) VALUES {string.Join(", ", valuesList)};",
-                _ => throw new NotSupportedException($"The database type {database} is not supported.")
-            };
-
-            return insertDataQuery;
+            
         }
+        public static void GetSelectQuery(string TableName, DbContext _sourceDbContext)
+        {
 
+            string SelectQuery = $@"SELECT * FROM {TableName}";
+            var ExecuteQuery = _sourceDbContext.Database.ExecuteSqlRaw(SelectQuery);
+            Console.WriteLine(ExecuteQuery);
+        }
 
     } // CREATE SEQUENCE urunler_urun_id_seq;
 }
