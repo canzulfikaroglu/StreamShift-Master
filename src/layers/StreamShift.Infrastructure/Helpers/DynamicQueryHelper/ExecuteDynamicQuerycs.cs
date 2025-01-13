@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
@@ -36,10 +37,11 @@ public async Task<List<dynamic>> ExecuteDynamicQuery(DbContext dbContext, string
                 {
                     rowDict[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
                 }
-
+                   
+                   
                 results.Add(row);
             }
-
+               
             return results;
 
         }
@@ -48,6 +50,5 @@ public async Task<List<dynamic>> ExecuteDynamicQuery(DbContext dbContext, string
             await connection.CloseAsync();
         }
     }
-
 }
 }
