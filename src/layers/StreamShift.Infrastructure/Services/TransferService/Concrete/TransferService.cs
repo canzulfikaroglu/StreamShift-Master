@@ -33,7 +33,7 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
 
                 using (var _destinationDbContext = _contextFactory.CreateDbContext(destinationConnectionString, destinationType))
                 {
-                //    QueryExtensions.TableSequenceCreate(sourceSchema, _destinationDbContext);//sekans oluşturur
+                    QueryExtensions.TableSequenceCreate(sourceSchema, _destinationDbContext,destinationType);//sekans oluşturur
 
                     var schemas = sourceSchema.GroupBy(x => x.SchemaName).Select(x => x.Key).ToList();
                     foreach (var schema in schemas)
@@ -75,49 +75,30 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
                                         string toplukolonlar = "";
                                         string topludegerler = "";
 
-                                        
-                                        for (int i = 0; i < rows.Count; i++)
+
+                                        for (int i = 0; i < rows.Count; i=i+1)
                                         {
-                                            Console.WriteLine("index sayisi" + i);
+                                            Console.WriteLine("i sayısı :" + i);
                                           
                                             foreach (var pair in rows[i])
                                             {
-                                                
-                                             
-                                           //       Console.WriteLine("kolon adı: "+pair.Key+ " deger: " +pair.Value);
-
-
-                                                QueryExtensions.InsertPreparation(pair.Key,pair.Value,rows, table,out columnName,out dataName);
-
-                                            //, ve '' ları fonksiyonun içinde ayarlayıp aşşağıda insert komutuna eşitleyip execute edicez
-
+                                                QueryExtensions.TableQuotationMark(pair.Key,pair.Value,rows, table,out columnName,out dataName);
                                                 toplukolonlar = toplukolonlar+","+ columnName;
                                                 topludegerler = topludegerler+","+ dataName;
-
-                                                //burada gelen key ve value değerlerini alıp düzenlemesi yapılacak 
-
-
                                             }
                                             if (toplukolonlar.Length > 0 && toplukolonlar[0] == ',')
                                             {
-                                                // İlk karakterdeki virgülü kaldır
                                                 toplukolonlar = toplukolonlar.Substring(1);
-                                            //    Console.WriteLine("İlk karakterdeki virgül kaldırıldı. Yeni string: " + toplukolonlar);
                                             }
                                             if (topludegerler.Length > 0 && topludegerler[0] == ',')
                                             {
-                                                // İlk karakterdeki virgülü kaldır
                                                 topludegerler = topludegerler.Substring(1);
-                                            //    Console.WriteLine("İlk karakterdeki virgül kaldırıldı. Yeni string: " + topludegerler);
                                             }
                                             insert = $@"INSERT INTO {table} ({toplukolonlar}) VALUES ({topludegerler})";
                                             Console.WriteLine(insert);
                                             var insertDatabase = _destinationDbContext.Database.ExecuteSqlRaw(insert);
-                                            //    Console.WriteLine("kolonlar : " + toplukolonlar + " data : " + topludegerler);
                                             topludegerler = "";
                                             toplukolonlar = "";
-
-                                            //insert komutu burada çalışcak
                                         } 
                                     }
                                 }

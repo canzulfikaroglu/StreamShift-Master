@@ -91,52 +91,34 @@ namespace StreamShift.Infrastructure.Extension
             };
             return query;
         }
-        public static async void TableSequenceCreate(List<TableSchema> sourceSchema,DbContext _destinationDbContext)
+        public static void TableSequenceCreate(List<TableSchema> sourceSchema,DbContext _destinationDbContext,eDatabase destinationDatabase)
         {
-            foreach (var schema in sourceSchema)
-            {//sekans var ise bu kontrole girmemesini sağlamalıyız
-                //string sequenceControl = $@" SELECT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = '{schema.TableName}_{schema.ColumnName}_seq') AS sequence_exists;";
-                //var sequenceControlSql = _destinationDbContext.Database.ExecuteSql($@" SELECT EXISTS (SELECT 1 FROM pg_sequences WHERE schemaname = 'public' AND sequencename = '{schema.TableName}_{schema.ColumnName}_seq') AS sequence_exists;");
-                //sequenceControlSql.ToString();
-                
-                //using (var command = connection.CreateCommand())
-                //{
-                //    command.CommandText = sequenceControl;
-
-                //    var result = command.ExecuteScalar(); // Sorgu sonucunu döndürür
-                //    string sequenceExists = result?.ToString(); // Sonucu string'e çevirir
-
-                //    if (sequenceExists == "true")
-                //    {
-                //        Console.WriteLine("Sequence exists.");
-                //    }
-                //    else
-                //    {
-                //        Console.WriteLine("Sequence does not exist.");
-                //    }
-                //}
-                if (schema.IsPrimaryKey == "YES" )
+            if (destinationDatabase == eDatabase.Postgres) {
+                foreach (var schema in sourceSchema)
                 {
-                    // sekanks var ise true dönen sorgu 
-                    /**/
-                    string sequenceSql = $@"CREATE SEQUENCE {schema.TableName}_{schema.ColumnName}_seq";
-                    var createSequence = _destinationDbContext.Database.ExecuteSqlRaw(sequenceSql);
+                    if (schema.IsPrimaryKey == "YES")
+                    {
+                        string sequenceSql = $@"CREATE SEQUENCE {schema.TableName}_{schema.ColumnName}_seq";
+                        var createSequence = _destinationDbContext.Database.ExecuteSqlRaw(sequenceSql);
+                    }
                 }
-            }
-        }
-        public static string GetInsertQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns,List<dynamic> row)
-        {
-                var columnNames = string.Join(", ", columns.Select(c => c.ColumnName));
-                var values = string.Join(", ", row.Select(value => $"'{value}'")); // Veriyi uygun şekilde formatlayın
 
-            return database switch
-            {
-                eDatabase.MsSqlServer => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
-                eDatabase.Postgres => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
-                eDatabase.Sqlite => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
-                _ => throw new NotSupportedException($"The database type {database} is not supported.")
-            };
+            }
+           
         }
+        //public static string GetInsertQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns,List<dynamic> row)
+        //{
+        //        var columnNames = string.Join(", ", columns.Select(c => c.ColumnName));
+        //        var values = string.Join(", ", row.Select(value => $"'{value}'")); // Veriyi uygun şekilde formatlayın
+
+        //    return database switch
+        //    {
+        //        eDatabase.MsSqlServer => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
+        //        eDatabase.Postgres => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
+        //        eDatabase.Sqlite => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
+        //        _ => throw new NotSupportedException($"The database type {database} is not supported.")
+        //    };
+        //}
         public static void GetSelectQuery(string TableName, DbContext _sourceDbContext) //tablodaki verileri select sorgusu ile çekme fonksiyonu
         {
 
@@ -144,74 +126,18 @@ namespace StreamShift.Infrastructure.Extension
             var ExecuteQuery = _sourceDbContext.Database.ExecuteSqlRaw(SelectQuery);
             Console.WriteLine(ExecuteQuery);
         }
-        public static string InsertPreparation(object key,object value,List<dynamic> rows,string tableName,out string topluColumn,out string topluData)
+        public static string TableQuotationMark(object key,object value,List<dynamic> rows,string tableName,out string topluColumn,out string topluData)
         {
             string columnName = "";
             string data = "";
             topluData = "";// dışarıya gönderdiğimiz değerler
             topluColumn = "";// dışarıya gönderdiğimiz değerler
-            
-            string columnNameComma = "";
-          
-            string dataComma = "";
-            string topluColumnGecici = "";
-            string topluDataGecici = "";
-            string butundatalar= "";
-            string butuncolumnnameler = "";
-            string insertgecici = "";
-            
-            
             columnName = key.ToString();
-            columnNameComma = columnName;
-           
             data = value.ToString();
-            dataComma = data;
-            dataComma = "'" + dataComma + "'";
-            if (topluDataGecici == "")
-            {
-            topluDataGecici = dataComma;
-            }
-            else
-            {
-            topluDataGecici = topluDataGecici + "," + dataComma;
-                topluData = topluDataGecici;
-            }
-
-            if (topluColumnGecici == "")
-            {
-            topluColumnGecici = columnNameComma;
-               
-            }
-            else
-            {
-            topluColumnGecici = topluColumnGecici + "," + columnNameComma;
-                topluColumn = topluColumnGecici;
-            }
-
-            //   Console.WriteLine($"Key: {pair.Key}, Value: {pair.Value}");
-
-            topluColumn = topluColumnGecici + butuncolumnnameler;
-            topluData = topluDataGecici + butundatalar;
-                
-                
-                //     Console.WriteLine(insert);//
-             
-
-                //insert düzenlendikten sonra burda çalıştırma fonksiyonu burada olacak çalışacak
-                
-               
-            return "can";
-
-
-
-
-
-
-
-            //     Console.WriteLine("tablo adi:"+topluColumnGecici +"deger:"+topluDataGecici);
-            //Console.WriteLine(momentValueString);
-
-
+            data = "'" + data + "'";
+            topluData = data;
+            topluColumn = columnName;
+            return "CANBABA3ve1";
         }
     }
 }
