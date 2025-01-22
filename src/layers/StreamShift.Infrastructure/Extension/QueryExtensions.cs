@@ -23,46 +23,98 @@ namespace StreamShift.Infrastructure.Extension
         {
             return database switch
             {
-                eDatabase.MsSqlServer => @"SELECT TABLE_SCHEMA AS SchemaName, TABLE_NAME AS TableName, COLUMN_NAME AS ColumnName, DATA_TYPE AS DataType, CHARACTER_MAXIMUM_LENGTH AS MaxLength FROM INFORMATION_SCHEMA.COLUMNS ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION;",
+                eDatabase.MsSqlServer => @"SELECT c.TABLE_SCHEMA AS schemaname, c.TABLE_NAME AS tablename, c.COLUMN_NAME AS columnname, c.DATA_TYPE AS datatype, c.CHARACTER_MAXIMUM_LENGTH AS maxlength, CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 'YES' ELSE 'NO' END AS isprimarykey, CASE WHEN c.IS_NULLABLE = 'NO' THEN 'YES' ELSE 'NO' END AS isnotnull, CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 'YES' ELSE c.COLUMN_DEFAULT END AS defaultvalue FROM INFORMATION_SCHEMA.COLUMNS c LEFT JOIN (SELECT tc.TABLE_SCHEMA, tc.TABLE_NAME, kcu.COLUMN_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME AND tc.TABLE_SCHEMA = kcu.TABLE_SCHEMA WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY') pk ON c.TABLE_SCHEMA = pk.TABLE_SCHEMA AND c.TABLE_NAME = pk.TABLE_NAME AND c.COLUMN_NAME = pk.COLUMN_NAME WHERE c.TABLE_SCHEMA NOT IN ('INFORMATION_SCHEMA', 'sys') ORDER BY c.TABLE_SCHEMA, c.TABLE_NAME, c.ORDINAL_POSITION;",                 
                 eDatabase.Postgres => @"SELECT c.table_schema AS SchemaName, c.table_name AS TableName, c.column_name AS ColumnName, c.data_type AS DataType, c.character_maximum_length AS MaxLength, CASE WHEN pk.column_name IS NOT NULL THEN 'YES' ELSE 'NO' END AS IsPrimaryKey, CASE WHEN c.is_nullable = 'NO' THEN 'YES' ELSE 'NO' END AS IsNotNull, pg_get_expr(ad.adbin, ad.adrelid) AS DefaultValue FROM information_schema.columns c LEFT JOIN ( SELECT tc.table_schema, tc.table_name, kcu.column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema WHERE tc.constraint_type = 'PRIMARY KEY' ) pk ON c.table_schema = pk.table_schema AND c.table_name = pk.table_name AND c.column_name = pk.column_name LEFT JOIN pg_attrdef ad ON ad.adrelid = ( SELECT oid FROM pg_class WHERE relname = c.table_name AND relnamespace = ( SELECT oid FROM pg_namespace WHERE nspname = c.table_schema ) ) AND ad.adnum = ( SELECT ordinal_position FROM information_schema.columns WHERE table_schema = c.table_schema AND table_name = c.table_name AND column_name = c.column_name ) WHERE c.table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY c.table_schema, c.table_name, c.ordinal_position;",
                 eDatabase.Sqlite => @"SELECT name AS TableName FROM sqlite_master WHERE type='table' ORDER BY name;",
                 _ => throw new NotSupportedException($"The database type {database} is not supported.")
             };
         }
-        public static string GetCreateTableQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns)
-        {
+        public static string GetCreateTableQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns,out List<string> primaryKeys)
+        {/*mssql sorgu CREATE TABLE kategoriler (kategori_id INT NOT NULL IDENTITY(1,1),kategori_adi VARCHAR(50) NOT NULL,PRIMARY KEY (kategori_id));
+          
+       postgresql   CREATE TABLE kategoriler (kategori_id integer NOT NULL DEFAULT nextval('kategoriler_kategori_id_seq'::regclass), kategori_adi character varying(50) NOT NULL , PRIMARY KEY (kategori_id));
+                    CREATE TABLE kategoriler (kategori_id integer NOT NULL DEFAULT nextval('kategoriler_kategori_id_seq'::regclass), kategori_adi character varying(50) NOT NULL , PRIMARY KEY (kategori_id));
+          */
+
             if (string.IsNullOrWhiteSpace(tableName) || columns == null || !columns.Any())
                 throw new ArgumentException("Table name and columns must be provided.");
+
             var columnDefinitions = columns.Select(c =>
             {
-                var columnDef = $"{c.ColumnName} {c.DataType}";
-                // Veri tipi VARCHAR ise uzunluk ekle
-                if (c.DataType.ToLower().Contains("character varying") && c.MaxLength.HasValue)
-                {
-                    columnDef += $"({c.MaxLength})";
+                var columnDef = "";
+                if (c.DataType.ToLower().Contains("bigint") || c.DataType.ToLower().Contains("numeric")) {
+                    columnDef = $"{c.ColumnName} {c.DataType}";
                 }
-                // NOT NULL ekle
-                if (c.IsNotNull == "YES")
+                
+                if(database == eDatabase.MsSqlServer && c.DataType== "character varying")
                 {
-                    columnDef += " NOT NULL";
+                    columnDef += $"{c.ColumnName} VARCHAR";
                 }
-                // Varsayılan değer ekle
-                if (!string.IsNullOrWhiteSpace(c.DefaultValue))
+                if (database == eDatabase.Postgres)// postgresql'e göre 
                 {
-                    columnDef += $" DEFAULT {c.DefaultValue}";
+                    if (c.DataType.ToLower().Contains("varchar") && c.MaxLength!=null)
+                    {
+                        columnDef += $"{c.ColumnName} character varying({c.MaxLength})";
+                    }
+                    if (c.DataType=="int")
+                    {
+                        columnDef += $"{c.ColumnName} integer";
+                    }
+                    // Veri tipi VARCHAR ise uzunluk ekle
+                    if (c.DataType.ToLower().Contains("character varying") && c.MaxLength.HasValue)
+                    {
+                        columnDef += $"({c.MaxLength})";
+                    }
+                    // NOT NULL ekle
+                    if (c.IsNotNull == "YES")
+                    {
+                        columnDef += " NOT NULL";
+                    }
+                    // Varsayılan değer ekle
+                    if (!string.IsNullOrWhiteSpace(c.DefaultValue))
+                    {
+                        columnDef += $" DEFAULT nextval('{c.TableName}_{c.ColumnName}_seq'::regclass)";
+                    }
+                   
                 }
+                if (database == eDatabase.MsSqlServer)
+                {
+                    //veri tipi integer ise int ekle
+                    if (c.DataType.ToLower().Contains("integer"))
+                    {
+                        columnDef += $"{c.ColumnName} INT";
+                    }
+                    // Veri tipi VARCHAR ise uzunluk ekle
+                    if (c.DataType.ToLower().Contains("character varying") && c.MaxLength.HasValue)
+                    {
+                        columnDef += $"({c.MaxLength})";
+                    }
+                    // NOT NULL ekle
+                    if (c.IsNotNull == "YES")
+                    {
+                        columnDef += " NOT NULL";
+                    }
+                    // Varsayılan değer ekle
+                    if (!string.IsNullOrWhiteSpace(c.DefaultValue))
+                    {
+                        columnDef += $" IDENTITY(1,1)";
+                      
+                    }
+
+                }
+             
                 return columnDef;
             });
             // Primary Key tanımlamaları
-            var primaryKeys = columns
+            primaryKeys = columns
                 .Where(c => c.IsPrimaryKey == "YES" ? true : false)
                 .Select(c => c.ColumnName)
                 .ToList();
             string primaryKeyConstraint = primaryKeys.Any()
                 ? $", PRIMARY KEY ({string.Join(", ", primaryKeys)})"
                 : string.Empty;
-          //  TableSequenceCreate(tableName, columnDef, primaryKeys);
-            // Tüm SQL sorgusunu birleştirme
+
+
             string createTableQuery = database switch
             {
                 eDatabase.MsSqlServer => $@"CREATE TABLE {tableName} ({string.Join(", ", columnDefinitions)} {primaryKeyConstraint});",
@@ -81,7 +133,7 @@ namespace StreamShift.Infrastructure.Extension
                 throw new ArgumentException("Table name must be provided.");
             string query = database switch
             {
-                eDatabase.MsSqlServer => $@"SELECT CASE WHEN EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}') THEN 1 ELSE 0 END;",
+                eDatabase.MsSqlServer => $@"SELECT CAST(CASE WHEN EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}') THEN 1 ELSE 0 END AS BIT) AS Exist;",
 
                 eDatabase.Postgres => $"SELECT EXISTS ( SELECT 1 FROM information_schema.tables WHERE table_name = '{tableName}' ) AS Exist",
 
@@ -91,9 +143,9 @@ namespace StreamShift.Infrastructure.Extension
             };
             return query;
         }
-        public static void TableSequenceCreate(List<TableSchema> sourceSchema,DbContext _destinationDbContext,eDatabase destinationDatabase)
+        public static void TableSequenceCreate(List<TableSchema> sourceSchema,DbContext _destinationDbContext)
         {
-            if (destinationDatabase == eDatabase.Postgres) {
+          
                 foreach (var schema in sourceSchema)
                 {
                     if (schema.IsPrimaryKey == "YES")
@@ -102,9 +154,6 @@ namespace StreamShift.Infrastructure.Extension
                         var createSequence = _destinationDbContext.Database.ExecuteSqlRaw(sequenceSql);
                     }
                 }
-
-            }
-           
         }
         //public static string GetInsertQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns,List<dynamic> row)
         //{
@@ -127,17 +176,19 @@ namespace StreamShift.Infrastructure.Extension
             Console.WriteLine(ExecuteQuery);
         }
         public static string TableQuotationMark(object key,object value,List<dynamic> rows,string tableName,out string topluColumn,out string topluData)
-        {
+         {
+
+            //burada primary key kontrolü sağlayıp fonksiyonda haber vermeliyiz
             string columnName = "";
             string data = "";
-            topluData = "";// dışarıya gönderdiğimiz değerler
-            topluColumn = "";// dışarıya gönderdiğimiz değerler
+            topluData = "";// dışarıya gönderdiğimiz Data değeri
+            topluColumn = "";// dışarıya gönderdiğimiz Column değeri
             columnName = key.ToString();
             data = value.ToString();
             data = "'" + data + "'";
             topluData = data;
             topluColumn = columnName;
-            return "CANBABA3ve1";
+            return "";
         }
     }
 }

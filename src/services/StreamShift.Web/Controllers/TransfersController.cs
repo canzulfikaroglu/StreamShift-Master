@@ -165,7 +165,7 @@ namespace StreamShift.Web.Controllers
             {
                 return NotFound();
             }
-
+            //buraya İdye göre bir delete sorgusu yazdıran bir fonksiyon çağıralacak aldığı id değerine göre silecek : delete 
             return View(transfer);
         }
 

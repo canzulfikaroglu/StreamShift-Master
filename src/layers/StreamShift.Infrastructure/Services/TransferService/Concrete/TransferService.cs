@@ -18,6 +18,7 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
 {
     public class TransferService : ITransferService
     {
+        List<string> Isprimary;
         private readonly IDbContextFactory _contextFactory;
 
         public TransferService(IDbContextFactory dbContextFactory)
@@ -33,7 +34,7 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
 
                 using (var _destinationDbContext = _contextFactory.CreateDbContext(destinationConnectionString, destinationType))
                 {
-                    QueryExtensions.TableSequenceCreate(sourceSchema, _destinationDbContext,destinationType);//sekans oluşturur
+                    QueryExtensions.TableSequenceCreate(sourceSchema, _destinationDbContext);//sekans oluşturur
 
                     var schemas = sourceSchema.GroupBy(x => x.SchemaName).Select(x => x.Key).ToList();
                     foreach (var schema in schemas)
@@ -60,46 +61,48 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
                                             DefaultValue = x.DefaultValue,
                                             IsNotNull = x.IsNotNull
                                         });
-                                        var createTableQuery = destinationType.GetCreateTableQuery(table, columns);
+                                        var createTableQuery = destinationType.GetCreateTableQuery(table, columns,out Isprimary);
                                         await _destinationDbContext.Database.ExecuteSqlRawAsync(createTableQuery);
-                                        var deneme = new ExecuteDynamicQuerycs();
+                                        var dynamicData = new ExecuteDynamicQuerycs();
                                         var selectQuery = $"SELECT * FROM {schema}.{table}";
-                                        var rows = await deneme.ExecuteDynamicQuery(_sourceDbContext, selectQuery);
-                                        //   QueryExtensions.GetInsertTable(sourceSchema, _destinationDbContext,rows);
-                                        //kaynak veritabanındaki verileri forech döngüsü ile konsola yazdırma 
+                                        var rows = await dynamicData.ExecuteDynamicQuery(_sourceDbContext, selectQuery);
                                         string insert = "";
-                                        //  QueryExtensions.InsertPreparation(rows, out insert, table);
-                                        int count = 0;
                                         string columnName = "";
                                         string dataName = "";
                                         string toplukolonlar = "";
                                         string topludegerler = "";
 
 
-                                        for (int i = 0; i < rows.Count; i=i+1)
+
+                                        for (int i = 0; i < rows.Count; i++)
                                         {
-                                            Console.WriteLine("i sayısı :" + i);
-                                          
+                                            Console.WriteLine("table data: " + i);
+
                                             foreach (var pair in rows[i])
                                             {
-                                                QueryExtensions.TableQuotationMark(pair.Key,pair.Value,rows, table,out columnName,out dataName);
-                                                toplukolonlar = toplukolonlar+","+ columnName;
-                                                topludegerler = topludegerler+","+ dataName;
-                                            }
-                                            if (toplukolonlar.Length > 0 && toplukolonlar[0] == ',')
-                                            {
-                                                toplukolonlar = toplukolonlar.Substring(1);
-                                            }
-                                            if (topludegerler.Length > 0 && topludegerler[0] == ',')
-                                            {
-                                                topludegerler = topludegerler.Substring(1);
+                                                QueryExtensions.TableQuotationMark(pair.Key, pair.Value, rows, table, out columnName, out dataName);
+                                                if (destinationType == eDatabase.MsSqlServer && Isprimary.Contains(pair.Key))
+                                                { //primary key ise insert'e eklenmeyecek
+                                                    columnName = "";
+                                                    dataName = "";
+                                                }
+                                                toplukolonlar = toplukolonlar + "," + columnName;
+                                                topludegerler = topludegerler + "," + dataName;
+                                                if (toplukolonlar.Length > 0 && toplukolonlar[0] == ',')
+                                                {
+                                                    toplukolonlar = toplukolonlar.Substring(1);
+                                                }
+                                                if (topludegerler.Length > 0 && topludegerler[0] == ',')
+                                                {
+                                                    topludegerler = topludegerler.Substring(1);
+                                                }
                                             }
                                             insert = $@"INSERT INTO {table} ({toplukolonlar}) VALUES ({topludegerler})";
                                             Console.WriteLine(insert);
                                             var insertDatabase = _destinationDbContext.Database.ExecuteSqlRaw(insert);
                                             topludegerler = "";
                                             toplukolonlar = "";
-                                        } 
+                                        }
                                     }
                                 }
                             }

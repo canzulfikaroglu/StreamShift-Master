@@ -25,7 +25,7 @@ namespace StreamShift.Infrastructure.Repository
 
         public Task<TEntity> FindByIdAsync(string id)
         {
-            
+
             throw new NotImplementedException();
         }
 
