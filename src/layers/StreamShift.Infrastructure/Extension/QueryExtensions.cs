@@ -29,7 +29,7 @@ namespace StreamShift.Infrastructure.Extension
                 _ => throw new NotSupportedException($"The database type {database} is not supported.")
             };
         }
-        public static string GetCreateTableQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns,out List<string> primaryKeys)
+        public static string GetCreateTableQuery(this eDatabase destidatabase, string tableName, IEnumerable<TableSchema> columns,out List<string> primaryKeys,eDatabase sourcedatabase)
         {/*mssql sorgu CREATE TABLE kategoriler (kategori_id INT NOT NULL IDENTITY(1,1),kategori_adi VARCHAR(50) NOT NULL,PRIMARY KEY (kategori_id));
           
        postgresql   CREATE TABLE kategoriler (kategori_id integer NOT NULL DEFAULT nextval('kategoriler_kategori_id_seq'::regclass), kategori_adi character varying(50) NOT NULL , PRIMARY KEY (kategori_id));
@@ -41,18 +41,41 @@ namespace StreamShift.Infrastructure.Extension
 
             var columnDefinitions = columns.Select(c =>
             {
-                var columnDef = "";
-                if (c.DataType.ToLower().Contains("bigint") || c.DataType.ToLower().Contains("numeric")) {
+                var columnDef="" ;
+                if (sourcedatabase==eDatabase.Postgres && destidatabase==eDatabase.Postgres)//postgreden postgreye aktarım için
+                {
+                    columnDef = $"{c.ColumnName} {c.DataType}";
+      
+                    if (c.DataType.ToLower().Contains("character varying") && c.MaxLength.HasValue)
+                    {
+                        columnDef += $"({c.MaxLength})";
+                    }
+                    // NOT NULL ekle
+                    if (c.IsNotNull == "YES")
+                    {
+                        columnDef += " NOT NULL";
+                    }
+                    // Varsayılan değer ekle
+                    if (!string.IsNullOrWhiteSpace(c.DefaultValue))
+                    {
+                        columnDef += $" DEFAULT {c.DefaultValue}";
+                    }
+
+                }
+                if (c.DataType!="int" && c.DataType != "integer" && c.DataType != "character varying" && c.DataType != "varchar" && destidatabase!=sourcedatabase)
+                {
                     columnDef = $"{c.ColumnName} {c.DataType}";
                 }
                 
-                if(database == eDatabase.MsSqlServer && c.DataType== "character varying")
+              
+                
+                if(destidatabase == eDatabase.MsSqlServer && c.DataType== "character varying")
                 {
                     columnDef += $"{c.ColumnName} VARCHAR";
                 }
-                if (database == eDatabase.Postgres)// postgresql'e göre 
+                if (sourcedatabase==eDatabase.MsSqlServer && destidatabase==eDatabase.Postgres)// mssqlden postgreye aktarım için
                 {
-                    if (c.DataType.ToLower().Contains("varchar") && c.MaxLength!=null)
+                    if (c.DataType=="varchar" && c.MaxLength!=null)
                     {
                         columnDef += $"{c.ColumnName} character varying({c.MaxLength})";
                     }
@@ -61,7 +84,7 @@ namespace StreamShift.Infrastructure.Extension
                         columnDef += $"{c.ColumnName} integer";
                     }
                     // Veri tipi VARCHAR ise uzunluk ekle
-                    if (c.DataType.ToLower().Contains("character varying") && c.MaxLength.HasValue)
+                    if (c.DataType=="character varying" && c.MaxLength.HasValue)
                     {
                         columnDef += $"({c.MaxLength})";
                     }
@@ -77,7 +100,7 @@ namespace StreamShift.Infrastructure.Extension
                     }
                    
                 }
-                if (database == eDatabase.MsSqlServer)
+                if (destidatabase == eDatabase.MsSqlServer && sourcedatabase==eDatabase.Postgres) //mssqlden postgreye aktarmak için
                 {
                     //veri tipi integer ise int ekle
                     if (c.DataType.ToLower().Contains("integer"))
@@ -115,7 +138,7 @@ namespace StreamShift.Infrastructure.Extension
                 : string.Empty;
 
 
-            string createTableQuery = database switch
+            string createTableQuery = destidatabase switch
             {
                 eDatabase.MsSqlServer => $@"CREATE TABLE {tableName} ({string.Join(", ", columnDefinitions)} {primaryKeyConstraint});",
 
@@ -123,7 +146,7 @@ namespace StreamShift.Infrastructure.Extension
 
                 eDatabase.Sqlite => $@"CREATE TABLE {tableName} ({string.Join(", ", columnDefinitions)} {primaryKeyConstraint});",
 
-                _ => throw new NotSupportedException($"The database type {database} is not supported.")
+                _ => throw new NotSupportedException($"The database type {destidatabase} is not supported.")
             };
             return createTableQuery;
         }
@@ -155,19 +178,6 @@ namespace StreamShift.Infrastructure.Extension
                     }
                 }
         }
-        //public static string GetInsertQuery(this eDatabase database, string tableName, IEnumerable<TableSchema> columns,List<dynamic> row)
-        //{
-        //        var columnNames = string.Join(", ", columns.Select(c => c.ColumnName));
-        //        var values = string.Join(", ", row.Select(value => $"'{value}'")); // Veriyi uygun şekilde formatlayın
-
-        //    return database switch
-        //    {
-        //        eDatabase.MsSqlServer => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
-        //        eDatabase.Postgres => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
-        //        eDatabase.Sqlite => $"INSERT INTO {tableName} ({columnNames}) VALUES ({values});",
-        //        _ => throw new NotSupportedException($"The database type {database} is not supported.")
-        //    };
-        //}
         public static void GetSelectQuery(string TableName, DbContext _sourceDbContext) //tablodaki verileri select sorgusu ile çekme fonksiyonu
         {
 
@@ -177,8 +187,6 @@ namespace StreamShift.Infrastructure.Extension
         }
         public static string TableQuotationMark(object key,object value,List<dynamic> rows,string tableName,out string topluColumn,out string topluData)
          {
-
-            //burada primary key kontrolü sağlayıp fonksiyonda haber vermeliyiz
             string columnName = "";
             string data = "";
             topluData = "";// dışarıya gönderdiğimiz Data değeri

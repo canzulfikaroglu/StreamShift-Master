@@ -61,7 +61,7 @@ namespace StreamShift.Infrastructure.Services.TransferService.Concrete
                                             DefaultValue = x.DefaultValue,
                                             IsNotNull = x.IsNotNull
                                         });
-                                        var createTableQuery = destinationType.GetCreateTableQuery(table, columns,out Isprimary);
+                                        var createTableQuery = destinationType.GetCreateTableQuery(table, columns,out Isprimary,sourceType);
                                         await _destinationDbContext.Database.ExecuteSqlRawAsync(createTableQuery);
                                         var dynamicData = new ExecuteDynamicQuerycs();
                                         var selectQuery = $"SELECT * FROM {schema}.{table}";
