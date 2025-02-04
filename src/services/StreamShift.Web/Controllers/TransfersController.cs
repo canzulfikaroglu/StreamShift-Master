@@ -88,6 +88,14 @@ namespace StreamShift.Web.Controllers
         // GET: Transfer/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
+            ViewBag.eDatabaseList = Enum.GetValues(typeof(eDatabase))
+              .Cast<eDatabase>()
+              .Select(e => new SelectListItem
+              {
+                  Value = e.ToString(),
+                  Text = e.ToString()
+              })
+              .ToList();
             if (id == null)
             {
                 return NotFound();
@@ -111,20 +119,26 @@ namespace StreamShift.Web.Controllers
                 return NotFound();
             }
             var old = await _context.Transfers.FirstOrDefaultAsync(x => x.Id == id);
-            if (old != null)
+            if (old == null)
             {
-                var AppUserId = User.GetIdClaim();
-                if (old.AppUserId != AppUserId)
-                {
-                    return NotFound();
-                }
+                return NotFound();
+            }
+
+            var AppUserId = User.GetIdClaim();
+            if (old.AppUserId != AppUserId)
+            {
+                return NotFound();
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(transfer);
+                    old.SourceDatabase = transfer.SourceDatabase;
+                    old.DestinationDatabase = transfer.DestinationDatabase;
+                    old.SourceConnectionString = transfer.SourceConnectionString;
+                    old.DestinationConnectionString = transfer.DestinationConnectionString;
+                    _context.Update(old);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -142,6 +156,7 @@ namespace StreamShift.Web.Controllers
             }
             return View(transfer);
         }
+
 
         // GET: Transfer/Delete/5
         public async Task<IActionResult> Delete(string id)
@@ -165,24 +180,27 @@ namespace StreamShift.Web.Controllers
             {
                 return NotFound();
             }
-            //buraya İdye göre bir delete sorgusu yazdıran bir fonksiyon çağıralacak aldığı id değerine göre silecek : delete 
+            
             return View(transfer);
         }
-
-        // POST: Transfer/Delete/5
+      //POST: Transfer/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteComplate(string id)
         {
             var transfer = await _context.Transfers.FindAsync(id);
             var AppUserId = User.GetIdClaim();
-            if (transfer.AppUserId != AppUserId)
+
+            if (transfer == null || transfer.AppUserId != AppUserId)
             {
                 return NotFound();
             }
             _context.Transfers.Remove(transfer);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            TempData["SuccessMessage"] = "Silme işlemi başarıyla gerçekleştirilmiştir.";
+
+            return View("DeleteComplate");
         }
 
         private bool TransferExists(string id)
@@ -190,6 +208,8 @@ namespace StreamShift.Web.Controllers
             var AppUserId = User.GetIdClaim();
             return _context.Transfers.Any(e => e.Id == id && e.AppUserId == AppUserId);
         }
+
+     
 
         //POST: Transfer/Start
 

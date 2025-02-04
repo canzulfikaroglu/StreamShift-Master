@@ -17,8 +17,15 @@ namespace StreamShift.Domain.Entities
         public eDatabase SourceDatabase { get; set; }
         public eDatabase DestinationDatabase { get; set; }
         public bool IsFinished { get; set; }
+        public List<TableSelection> SelectedTable { get; set; } = new List<TableSelection>();
 
         public virtual string? AppUserId { get; set; }
         public virtual AppUser? User { get; set; }
     }
+}
+public class TableSelection
+{
+    [Key] 
+    public string TableName { get; set; }
+    public bool IsSelected { get; set; }
 }
